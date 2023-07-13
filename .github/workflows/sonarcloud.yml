@@ -92,4 +92,4 @@ jobs:
         run: |
           pwd
           ls -l
-          ./gradlew build sonar --info
+          ./gradlew build sonar --stacktrace
