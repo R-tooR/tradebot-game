@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id "org.sonarqube" version "4.2.1.3168"
+    id "me.champeau.jmh" version "0.7.1"
 }
 
 group = 'pl.tradebot'
@@ -25,4 +26,13 @@ sonar {
         property "sonar.organization", "r-toor"
         property "sonar.host.url", "https://sonarcloud.io"
     }
+}
+
+jmh {
+    benchmarkMode = ['avgt']
+    fork = 1
+    batchSize = 1
+    resultFormat = 'JSON'
+    timeUnit = 'ns'
+    resultsFile = project.file("${project.buildDir}/reports/jmh/results.json")
 }
