@@ -75,4 +75,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: performance-results.json
-          path: build/reports/results.json
+          path: build/reports/jmh/results.json
