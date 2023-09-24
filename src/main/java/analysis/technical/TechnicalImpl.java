@@ -45,14 +45,14 @@ public class TechnicalImpl implements Technical {
             if (!pairsCandles.containsKey(pairName)) {
                 pairsCandles.put(pairName, new LinkedList<>());
             }
-            pairsCandles.get(pairName).add(new EntryValue(pairName, price));
+            pairsCandles.get(pairName).add(new EntryValue(pairName, price.orElse(BigDecimal.ZERO)));
 
             if (!pairsStrategies.containsKey(pairName)) {
                 pairsStrategies.put(pairName, new HashMap<>());
             }
             var strValuesForSpecificPair = pairsStrategies.get(pairName);
             strategies.forEach((strategyName, strategy) -> {
-                strValuesForSpecificPair.put(strategyName, strategy.calculate(price));
+                strValuesForSpecificPair.put(strategyName, strategy.calculate(price.orElse(BigDecimal.ZERO)));
             });
 
             pairsStrategies.put(pairName, strValuesForSpecificPair);

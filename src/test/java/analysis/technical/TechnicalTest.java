@@ -8,6 +8,7 @@ import analysis.strategies.Strategy;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -41,11 +42,11 @@ public class TechnicalTest {
 
         technical.addStrategy(strategyName, strategy);
 
-        Map<String, BigDecimal> mockedSampleResults = new HashMap<>();
+        Map<String, Optional<BigDecimal>> mockedSampleResults = new HashMap<>();
 
-        mockedSampleResults.put(aapl, aapl_price_1000);
+        mockedSampleResults.put(aapl, Optional.of(aapl_price_1000));
 
-        mockedSampleResults.put(eurpln, eur_price_4_654);
+        mockedSampleResults.put(eurpln, Optional.of(eur_price_4_654));
         Mockito.when(scrapper.getCurrentPrices()).thenReturn(mockedSampleResults);
 
         technical.start();
