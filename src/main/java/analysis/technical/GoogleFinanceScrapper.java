@@ -12,24 +12,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 public class GoogleFinanceScrapper implements Scrapper {
     private static final String URL_addr_prefix = "https://www.google.com/finance/quote/";
-//    private static final String URL_addr_prefix = "https://www.google.com/finance/quote/EUR-PLN";
 
     private final Client client;
 
-    private final ConcurrentHashMap<String, Optional<BigDecimal>> currentStockPrices;
+    private final ConcurrentLinkedQueue<Entry> currentStockPrices;
+    private final List<String> pairs;
     private final ExecutorService executorService;
     private final ScheduledExecutorService scheduledExecutorService;
 
-    public GoogleFinanceScrapper(List<String> pairs, ExecutorService executor) {
+    public GoogleFinanceScrapper(List<String> pairs, ConcurrentLinkedQueue<Entry> currentStockPrices, ExecutorService executor) {
+        this.currentStockPrices = currentStockPrices;
+        this.pairs = pairs;
         ClientBuilder.newBuilder();
         client = ClientBuilder.newClient();
-        currentStockPrices = initializeMapWithKeys(pairs);
         executorService = executor;
         scheduledExecutorService = Executors.newScheduledThreadPool(1);
     }
@@ -45,30 +46,31 @@ public class GoogleFinanceScrapper implements Scrapper {
 
     //todo jsaction="click:upfQVb"
     @Override
-    public ConcurrentHashMap<String, Optional<BigDecimal>> getCurrentPrices() {
+    public ConcurrentLinkedQueue<Entry> getCurrentPrices() {
         return currentStockPrices;
     }
-    
+
+    @Override
     public void start() {
         scheduledExecutorService.scheduleAtFixedRate(this::updatePrices, 0, 5, TimeUnit.SECONDS);
     }
 
+    @Override
     public void stop() {
         scheduledExecutorService.shutdown();
     }
 
     private void updatePrices() {
-        Set<String> prices = currentStockPrices.keySet();
-        prices.forEach(pair -> executorService.submit(() -> updatePrice(pair)));
+        pairs.forEach(pair -> executorService.submit(() -> updatePrice(pair)));
     }
 
     private void updatePrice(String pair) {
         try {
             String currPrice = Objects.requireNonNull(getCurrentPriceForIndex(pair));
             System.out.println(currPrice);
-            currentStockPrices.put(pair, Optional.of(
-                    new BigDecimal(currPrice)
-            ));
+            currentStockPrices.offer(
+                    new Entry(Instant.now().toEpochMilli(), pair, new BigDecimal(PriceParser.cleanAndParse(currPrice)))
+            );
         } catch (IOException e) {
             System.out.println("Failed to update price for " + pair);
         }
@@ -86,8 +88,7 @@ public class GoogleFinanceScrapper implements Scrapper {
                 if(input.startsWith("</script><c-wiz jsrenderer=\"jY5r6b\"")) { // przyspiesza, ew. jak się content strony zmienia, to można wyszukać, gdzie znajduje się fragment z interesującymi nas informacjami :)
                     int idx = input.indexOf("data-last-price");
                     if(idx != -1)
-                        return input.substring(idx + 17, idx + 24); //todo różne indeksy mają różną długość cyfry. Należy to dopasować do każdego indeksu...
-//                        return input.substring(idx + 17, idx + 25);
+                        return input.substring(idx + 17, idx + 25);
                 }
             }
         }
