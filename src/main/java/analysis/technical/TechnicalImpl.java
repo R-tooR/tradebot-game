@@ -3,26 +3,28 @@ package analysis.technical;
 import analysis.strategies.Strategy;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class TechnicalImpl implements Technical {
 
     private static final long TIME_SHIFT_TOLLERANCE_IN_MILLIS = 800;
-    private final Scrapper scrapper;
     private final Map<String, List<Entry>> pairsCandles;
 
                 //   para         //strategia //wartość strategii
+
+    //todo: nie ma potrzeby kolekcji 'pairsStrategiesResults': wynik może być przechowywany w instancji klasy Strategy...
     private final Map<String, Map<String, BigDecimal>> pairsStrategiesResults;
     private final Map<String, Strategy> strategies;
 
     private final Queue<Entry> pricesQueue;
 
     private final ScheduledExecutorService scheduledExecutorService;
-    public TechnicalImpl(Scrapper scrapper, Queue<Entry> pricesQueue) {
-        this.scrapper = scrapper;
+    public TechnicalImpl(Queue<Entry> pricesQueue) {
         this.pricesQueue = pricesQueue;
         pairsCandles = new HashMap<>();
         strategies = new HashMap<>();
@@ -32,18 +34,7 @@ public class TechnicalImpl implements Technical {
 
     @Override
     public BigDecimal getRecentCandleFor(String pairName, Frequency freq) throws NoPriceFoundException {
-        if(pairsCandles.containsKey(pairName)) {
-            List<Entry> setForSymbol = pairsCandles.get(pairName);
-
-            Optional<Entry> mostRecentForGivenFreq = setForSymbol.stream().filter(entry -> isRecentPriceForFrequencyApprox(freq, entry)).findFirst();
-            Entry entry = mostRecentForGivenFreq.orElseThrow(() -> new NoPriceFoundException(
-                    "Cannot find most recent price for " + pairName + " for " + freq.toString()
-            ));
-
-            return entry.value();
-        } else {
-            throw new NoPriceFoundException("Prices for " + pairName + " are not registered!");
-        }
+        return extractRecentCandles(1, freq, pairName, getTimestampMillis()).get(0).value();
     }
 
     private static boolean isRecentPriceForFrequencyApprox(Frequency freq, Entry entry) {
@@ -51,8 +42,29 @@ public class TechnicalImpl implements Technical {
     }
 
     @Override
-    public Optional<List<Entry>> getCandleBuffer(int size, Frequency freq, String pairName) {
-        return null;
+    public List<Entry> getCandleBuffer(int size, Frequency freq, String pairName) throws NoPriceFoundException {
+        return extractRecentCandles(size, freq, pairName, getTimestampMillis());
+    }
+
+    private List<Entry> extractRecentCandles(int size, Frequency freq, String pairName, long currEpochMillis) throws NoPriceFoundException {
+        if(pairsCandles.containsKey(pairName)) {
+            List<Entry> setForSymbol = pairsCandles.get(pairName);
+
+            List<Entry> results = setForSymbol.stream()
+                    .filter(entry -> isRecentPriceForFrequencyApprox(freq, entry))
+                    .filter(entry -> entry.timestamp() >= currEpochMillis - (size* freq.milliseconds))
+                    .limit(size).collect(Collectors.toList());
+
+            if(results.isEmpty()) {
+                throw new NoPriceFoundException(
+                        "Cannot find most recent price for " + pairName + " for " + freq.toString()
+                );
+            } else {
+                return results;
+            }
+        } else {
+            throw new NoPriceFoundException("Prices for " + pairName + " are not registered!");
+        }
     }
 
     @Override
@@ -67,10 +79,10 @@ public class TechnicalImpl implements Technical {
 
     @Override
     public void start() {
-        scheduledExecutorService.scheduleAtFixedRate(this::updateStrategies, 0, 5, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(this::processQueue, 0, 5, TimeUnit.SECONDS);
     }
 
-    protected void updateStrategies() {
+    protected void processQueue() {
         while (!pricesQueue.isEmpty()) {
             Entry entry = pricesQueue.poll();
 
@@ -100,5 +112,9 @@ public class TechnicalImpl implements Technical {
     @Override
     public void stop() {
         scheduledExecutorService.shutdown();
+    }
+
+    public long getTimestampMillis() {
+        return Instant.now().toEpochMilli();
     }
 }

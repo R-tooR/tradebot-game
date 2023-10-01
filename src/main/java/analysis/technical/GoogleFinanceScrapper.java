@@ -67,7 +67,6 @@ public class GoogleFinanceScrapper implements Scrapper {
     private void updatePrice(String pair) {
         try {
             String currPrice = Objects.requireNonNull(getCurrentPriceForIndex(pair));
-            System.out.println(currPrice);
             currentStockPrices.offer(
                     new Entry(Instant.now().toEpochMilli(), pair, new BigDecimal(PriceParser.cleanAndParse(currPrice)))
             );

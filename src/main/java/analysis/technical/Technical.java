@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface Technical extends Scheduledable {
     BigDecimal getRecentCandleFor(String pairName, Frequency freq) throws NoPriceFoundException;
-    Optional<List<Entry>> getCandleBuffer(int size, Frequency freq, String pairName);
+    List<Entry> getCandleBuffer(int size, Frequency freq, String pairName) throws NoPriceFoundException;
     Map<String, BigDecimal> getStrategyResultsForSymbol(String symbol);
 
     void addStrategy(String strategyName, Strategy strategy);
