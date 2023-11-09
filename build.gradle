@@ -11,11 +11,17 @@ repositories {
     mavenCentral()
 }
 
-String cxfVersion = '4.0.2'
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs << "-Xlint:all" << "-Werror"
+    }
+}
+
+String cxfVersion = '4.0.3'
 
 dependencies {
     implementation "org.apache.cxf:cxf-rt-rs-client:${cxfVersion}"
-    implementation "org.apache.cxf:cxf-rt-transports-http-hc:${cxfVersion}"
+//    implementation "org.apache.cxf:cxf-rt-transports-http-hc:${cxfVersion}"
 
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
