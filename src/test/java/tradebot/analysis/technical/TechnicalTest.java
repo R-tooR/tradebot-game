@@ -1,18 +1,15 @@
-package analysis.technical;
+package tradebot.analysis.technical;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-import analysis.strategies.Strategy;
+import tradebot.analysis.strategies.Strategy;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,11 +47,11 @@ public class TechnicalTest {
 
         when(strategy.calculate(aapl_price_1000)).thenReturn(strategy_41_123);
         when(strategy.calculate(eur_price_4_654)).thenReturn(strategy_65_880);
-        Technical technical = new TechnicalImpl(stockDataQueue);
+        TechnicalImpl technical = new TechnicalImpl(stockDataQueue);
 
         technical.addStrategy(strategyName, strategy);
 
-        ((TechnicalImpl) technical).processQueue();
+        technical.processQueue();
 
         Map<String, BigDecimal> eurPlnStr = technical.getStrategyResultsForSymbol(eurpln);
         assertEquals(eurPlnStr.size(), 1);
@@ -68,7 +65,6 @@ public class TechnicalTest {
     @Test
     public void testGetRecentCandleWhenTimeIsInRange() throws NoPriceFoundException {
         String eurpln = "EUR/PLN";
-        String nonExistingUsdpln = "USD/PLN";
 
         Queue<Entry> stockDataQueue = new ArrayDeque<>(
                 List.of(new Entry(0L, eurpln, BigDecimal.valueOf(1)),

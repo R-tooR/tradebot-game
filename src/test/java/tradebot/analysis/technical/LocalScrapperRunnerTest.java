@@ -1,4 +1,4 @@
-package analysis.technical;
+package tradebot.analysis.technical;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Disabled
-public class LocalScrapperRunner {
+public class LocalScrapperRunnerTest {
     @Test
 //    @org.junit.jupiter.api.Disabled
     public void runScrapperInRealEnvironment() throws InterruptedException {
@@ -58,4 +58,6 @@ public class LocalScrapperRunner {
         technical.stop();
         service.shutdown();
     }
+
+    //todo: round timestamp data - in configurable mode, so the dates will be rounded to whole seconds
 }

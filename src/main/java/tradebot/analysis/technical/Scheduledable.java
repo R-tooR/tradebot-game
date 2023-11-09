@@ -1,4 +1,4 @@
-package analysis.technical;
+package tradebot.analysis.technical;
 
 public interface Scheduledable {
     void start();

@@ -1,4 +1,4 @@
-package analysis.technical;
+package tradebot.analysis.technical;
 
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -38,7 +38,7 @@ public class GoogleFinanceScrapper implements Scrapper {
     private ConcurrentHashMap<String, Optional<BigDecimal>> initializeMapWithKeys(List<String> pairs) {
         ConcurrentHashMap<String, Optional<BigDecimal>> map = new ConcurrentHashMap<>();
         for(String pair: pairs) {
-            map.put(pair, Optional.<BigDecimal>empty());
+            map.put(pair, Optional.empty());
         }
 
         return map;

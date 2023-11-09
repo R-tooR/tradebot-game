@@ -1,4 +1,4 @@
-package analysis.strategies;
+package tradebot.analysis.strategies;
 
 import java.math.BigDecimal;
 

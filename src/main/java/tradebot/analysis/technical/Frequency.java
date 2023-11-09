@@ -1,4 +1,4 @@
-package analysis.technical;
+package tradebot.analysis.technical;
 
 public enum Frequency {
     SECOND(1000),

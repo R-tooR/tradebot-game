@@ -40,6 +40,12 @@ sonar {
     }
 }
 
+jar {
+    manifest {
+        attributes "Main-Class": "tradebot.Main"
+    }
+}
+
 jmh {
 //    includes = ['*google*']
     benchmarkMode = ['avgt']

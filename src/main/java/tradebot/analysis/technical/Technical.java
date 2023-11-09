@@ -1,11 +1,10 @@
-package analysis.technical;
+package tradebot.analysis.technical;
 
-import analysis.strategies.Strategy;
+import tradebot.analysis.strategies.Strategy;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public interface Technical extends Scheduledable {
     BigDecimal getRecentCandleFor(String pairName, Frequency freq) throws NoPriceFoundException;

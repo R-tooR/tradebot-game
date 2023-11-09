@@ -1,6 +1,6 @@
-package analysis.technical;
+package tradebot.analysis.technical;
 
-import analysis.strategies.Strategy;
+import tradebot.analysis.strategies.Strategy;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -96,9 +96,9 @@ public class TechnicalImpl implements Technical {
             pairsStrategiesResults.put(entry.pairName(), new HashMap<>());
         }
         var strValuesForSpecificPair = pairsStrategiesResults.get(entry.pairName());
-        strategies.forEach((strategyName, strategy) -> {
-            strValuesForSpecificPair.put(strategyName, strategy.calculate(Optional.ofNullable(entry.value()).orElse(BigDecimal.ZERO)));
-        });
+        strategies.forEach((strategyName, strategy) ->
+            strValuesForSpecificPair.put(strategyName, strategy.calculate(Optional.ofNullable(entry.value()).orElse(BigDecimal.ZERO)))
+        );
         pairsStrategiesResults.put(entry.pairName(), strValuesForSpecificPair);
     }
 
